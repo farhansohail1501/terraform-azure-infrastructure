@@ -13,6 +13,11 @@ variable "name_prefix" {
   description = "Prefix for the vault name; random suffix added for uniqueness"
 }
 
+variable "access_object_ids" {
+  type        = list(string)
+  description = "Object IDs allowed to access secrets (you + the pipeline robot)"
+}
+
 variable "tags" {
   type        = map(string)
   default     = {}

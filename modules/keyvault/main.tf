@@ -18,11 +18,14 @@ resource "azurerm_key_vault" "this" {
   tags                = var.tags
 
   # Who can open the safe, and what they can do
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
 
-    secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
+  dynamic "access_policy" {
+    for_each = var.access_object_ids
+    content {
+      tenant_id          = data.azurerm_client_config.current.tenant_id
+      object_id          = access_policy.value
+      secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
+    }
   }
 }
 

@@ -34,6 +34,7 @@ module "keyvault" {
   location            = azurerm_resource_group.main.location
   name_prefix         = "kvwebappstg"
   tags                = local.common_tags
+  access_object_ids   = ["9733cd41-7337-4fdd-a442-c2a47c40cf7d", "b31d4bba-3d7a-4682-85fd-7e47312b2f39"]
 }
 
 module "compute" {
