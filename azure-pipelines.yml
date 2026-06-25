@@ -7,6 +7,13 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+  - script: |
+      wget -q https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
+      unzip -o terraform_1.15.4_linux_amd64.zip
+      sudo mv terraform /usr/local/bin/
+      terraform -version
+    displayName: 'Install Terraform'
+
   - task: AzureCLI@2
     displayName: 'Terraform Validate and Plan'
     inputs:
