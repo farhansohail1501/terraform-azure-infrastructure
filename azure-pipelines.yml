@@ -6,28 +6,101 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-  - script: |
-      wget -q https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
-      unzip -o terraform_1.15.4_linux_amd64.zip
-      sudo mv terraform /usr/local/bin/
-      terraform -version
-    displayName: 'Install Terraform'
+stages:
+  # ============ BUILD: validate + plan ============
+  - stage: Build
+    displayName: 'Validate & Plan'
+    jobs:
+      - job: ValidatePlan
+        steps:
+          - script: |
+              wget -q https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
+              unzip -o terraform_1.15.4_linux_amd64.zip
+              sudo mv terraform /usr/local/bin/
+              terraform -version
+            displayName: 'Install Terraform'
+          - task: AzureCLI@2
+            displayName: 'Validate & Plan (Staging)'
+            inputs:
+              azureSubscription: 'azurerm-connection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              addSpnToEnvironment: true
+              inlineScript: |
+                export ARM_CLIENT_ID=$servicePrincipalId
+                export ARM_OIDC_TOKEN=$idToken
+                export ARM_TENANT_ID=$tenantId
+                export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+                export ARM_USE_OIDC=true
+                cd environments/staging
+                terraform init
+                terraform validate
+                terraform plan
 
-  - task: AzureCLI@2
-    displayName: 'Terraform Validate and Plan'
-    inputs:
-      azureSubscription: 'azurerm-connection'
-      scriptType: bash
-      scriptLocation: inlineScript
-      addSpnToEnvironment: true
-      inlineScript: |
-        export ARM_CLIENT_ID=$servicePrincipalId
-        export ARM_OIDC_TOKEN=$idToken
-        export ARM_TENANT_ID=$tenantId
-        export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-        export ARM_USE_OIDC=true
-        cd environments/staging
-        terraform init
-        terraform validate
-        terraform plan
+  # ============ DEPLOY TO STAGING (auto) ============
+  - stage: DeployStaging
+    displayName: 'Deploy to Staging'
+    dependsOn: Build
+    jobs:
+      - deployment: DeployStaging
+        environment: 'staging'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    wget -q https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
+                    unzip -o terraform_1.15.4_linux_amd64.zip
+                    sudo mv terraform /usr/local/bin/
+                  displayName: 'Install Terraform'
+                - task: AzureCLI@2
+                  displayName: 'Apply (Staging)'
+                  inputs:
+                    azureSubscription: 'azurerm-connection'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    addSpnToEnvironment: true
+                    inlineScript: |
+                      export ARM_CLIENT_ID=$servicePrincipalId
+                      export ARM_OIDC_TOKEN=$idToken
+                      export ARM_TENANT_ID=$tenantId
+                      export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+                      export ARM_USE_OIDC=true
+                      cd environments/staging
+                      terraform init
+                      terraform apply -auto-approve
+
+  # ============ DEPLOY TO PRODUCTION (needs approval) ============
+  - stage: DeployProduction
+    displayName: 'Deploy to Production'
+    dependsOn: DeployStaging
+    jobs:
+      - deployment: DeployProduction
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - script: |
+                    wget -q https://releases.hashicorp.com/terraform/1.15.4/terraform_1.15.4_linux_amd64.zip
+                    unzip -o terraform_1.15.4_linux_amd64.zip
+                    sudo mv terraform /usr/local/bin/
+                  displayName: 'Install Terraform'
+                - task: AzureCLI@2
+                  displayName: 'Apply (Production)'
+                  inputs:
+                    azureSubscription: 'azurerm-connection'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    addSpnToEnvironment: true
+                    inlineScript: |
+                      export ARM_CLIENT_ID=$servicePrincipalId
+                      export ARM_OIDC_TOKEN=$idToken
+                      export ARM_TENANT_ID=$tenantId
+                      export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+                      export ARM_USE_OIDC=true
+                      cd environments/production
+                      terraform init
+                      terraform apply -auto-approve
