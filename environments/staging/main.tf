@@ -46,3 +46,12 @@ module "compute" {
   admin_password      = module.keyvault.app_password
   tags                = local.common_tags
 }
+
+
+module "monitoring" {
+  source              = "../../modules/monitoring"
+  resource_group_name = azurerm_resource_group.main.name
+  vm_id               = module.compute.vm_id
+  alert_email         = "sohailfarhan000@gmail.com"
+  tags                = local.common_tags
+}
