@@ -71,7 +71,7 @@ stages:
                       terraform init
                       terraform apply -auto-approve
 
-  #DEPLOY TO PRODUCTION (needs approval)
+#DEPLOY TO PRODUCTION (needs approval)
   - stage: DeployProduction
     displayName: 'Deploy to Production'
     dependsOn: DeployStaging
