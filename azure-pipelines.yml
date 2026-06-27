@@ -7,7 +7,7 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-  # ============ BUILD: validate + plan ============
+  # BUILD: validate + plan
   - stage: Build
     displayName: 'Validate & Plan'
     jobs:
@@ -37,7 +37,7 @@ stages:
                 terraform validate
                 terraform plan
 
-  # ============ DEPLOY TO STAGING (auto) ============
+  #  DEPLOY TO STAGING
   - stage: DeployStaging
     displayName: 'Deploy to Staging'
     dependsOn: Build
@@ -71,7 +71,7 @@ stages:
                       terraform init
                       terraform apply -auto-approve
 
-  # ============ DEPLOY TO PRODUCTION (needs approval) ============
+  #DEPLOY TO PRODUCTION (needs approval)
   - stage: DeployProduction
     displayName: 'Deploy to Production'
     dependsOn: DeployStaging

@@ -39,7 +39,7 @@ resource "azurerm_network_security_group" "this" {
     destination_address_prefix = "*"
   }
 }
-
+#
 # Network card — connects the VM to YOUR subnet + the public IP
 resource "azurerm_network_interface" "this" {
   name                = "nic-${var.vm_name}"
