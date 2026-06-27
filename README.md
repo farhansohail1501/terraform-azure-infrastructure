@@ -8,7 +8,7 @@
 
 Infrastructure as Code (IaC) for provisioning and governing Azure environments using **Terraform** and **Azure DevOps CI/CD pipelines**.
 
-This project provisions a complete, multi-environment cloud platform — networking, compute, storage, secrets management, monitoring, and policy governance — and deploys it automatically through a build-and-release pipeline with a manual approval gate before production.
+A complete, multi-environment Azure platform — networking, compute, storage, secrets management, monitoring, and policy governance — provisioned and deployed automatically through a build-and-release pipeline with a manual approval gate before production.
 
 ### Skills demonstrated
 
@@ -142,23 +142,15 @@ Push to the `main` branch — the pipeline automatically validates, plans, deplo
 
 ---
 
-## Cleanup
-
-To avoid ongoing charges, destroy the resources when finished:
-
-```bash
-cd environments/staging
-terraform destroy
-
-cd ../production
-terraform destroy
-```
-
----
-
 ## Possible Future Enhancements
 
 - Save the Terraform plan as a pipeline artifact and apply the exact reviewed plan
 - Add security scanning (tfsec / Checkov) to the build stage
 - Adopt the official Azure naming module for standardized naming
 - Add VNet integration and a managed identity for the application
+
+---
+
+## Author
+
+**Muhammad Farhan Sohail** — [LinkedIn](https://www.linkedin.com/in/muhammad-farhan-sohail-019a37220/)
